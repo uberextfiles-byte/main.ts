@@ -1,0 +1,41 @@
+Deno.serve(async (req: Request) => {
+  const url = new URL(req.url);
+
+  if (url.pathname !== "/pixel") {
+    return new Response("Not found", { status: 404 });
+  }
+
+  const sid = url.searchParams.get("sid") || "";
+  const mailType = url.searchParams.get("mailType") || "initial";
+  const secret = url.searchParams.get("secret") || "";
+
+  const expectedSecret = "apoorv_secret_2026";
+  const appsScriptUrl =
+    "https://script.google.com/macros/s/AKfycbxniOaolre4wY4MnPVhVdK1GFed2th_KY3bz0wtEQweTagmZcRPspq4jOfGjRQ3pDY6/exec";
+
+  // 1x1 transparent GIF
+  const pixelBase64 =
+    "R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
+  const pixelBytes = Uint8Array.from(atob(pixelBase64), c => c.charCodeAt(0));
+
+  if (sid && secret === expectedSecret) {
+    const callbackUrl =
+      `${appsScriptUrl}?action=pixel_open` +
+      `&sid=${encodeURIComponent(sid)}` +
+      `&mailType=${encodeURIComponent(mailType)}` +
+      `&secret=${encodeURIComponent(secret)}`;
+
+    // fire-and-forget
+    fetch(callbackUrl).catch(() => {});
+  }
+
+  return new Response(pixelBytes, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/gif",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    }
+  });
+});
