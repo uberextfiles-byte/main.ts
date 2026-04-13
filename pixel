@@ -1,5 +1,5 @@
 const appsScriptUrl =
-  "https://script.google.com/macros/s/AKfycbyYNQt8S_4AxAieDoQVkHJ3SVJhvlno2EQLKUJAwTeeF3EeAc3nDTOqas3wIEbZdXlx/exec";
+  "https://script.google.com/macros/s/AKfycbzn1mZZk2IYl2nW7ILL0vtaIBPN-7G4UZX8O-KCp8zmc2aoWUdDUpU53LswAsv3IEH-nQ/exec";
 
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
