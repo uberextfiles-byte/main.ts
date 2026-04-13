@@ -1,3 +1,6 @@
+const appsScriptUrl =
+  "https://script.google.com/macros/s/AKfycbyYNQt8S_4AxAieDoQVkHJ3SVJhvlno2EQLKUJAwTeeF3EeAc3nDTOqas3wIEbZdXlx/exec";
+
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
 
@@ -5,31 +8,26 @@ Deno.serve(async (req: Request) => {
     return new Response("Not found", { status: 404 });
   }
 
-  const sid = url.searchParams.get("sid") || "";
+  const leadId = url.searchParams.get("lead_id") || "";
   const mailType = url.searchParams.get("mailType") || "initial";
-  const secret = url.searchParams.get("secret") || "";
 
-  const expectedSecret = "apoorv_secret_2026";
-  const appsScriptUrl =
-    "https://script.google.com/macros/s/AKfycbxniOaolre4wY4MnPVhVdK1GFed2th_KY3bz0wtEQweTagmZcRPspq4jOfGjRQ3pDY6/exec";
-
-  // 1x1 transparent GIF
-  const pixelBase64 =
-    "R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
-  const pixelBytes = Uint8Array.from(atob(pixelBase64), c => c.charCodeAt(0));
-
-  if (sid && secret === expectedSecret) {
+  if (leadId) {
     const callbackUrl =
       `${appsScriptUrl}?action=pixel_open` +
-      `&sid=${encodeURIComponent(sid)}` +
-      `&mailType=${encodeURIComponent(mailType)}` +
-      `&secret=${encodeURIComponent(secret)}`;
+      `&lead_id=${encodeURIComponent(leadId)}` +
+      `&mailType=${encodeURIComponent(mailType)}`;
 
-    // fire-and-forget
-    fetch(callbackUrl).catch(() => {});
+    fetch(callbackUrl).catch((err) => {
+      console.log("Apps Script callback failed:", err);
+    });
   }
 
-  return new Response(pixelBytes, {
+  const pixel = Uint8Array.from(
+    atob("R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="),
+    c => c.charCodeAt(0)
+  );
+
+  return new Response(pixel, {
     status: 200,
     headers: {
       "Content-Type": "image/gif",
