@@ -1,0 +1,39 @@
+const appsScriptUrl =
+  "https://script.google.com/macros/s/AKfycbyYNQt8S_4AxAieDoQVkHJ3SVJhvlno2EQLKUJAwTeeF3EeAc3nDTOqas3wIEbZdXlx/exec";
+
+Deno.serve(async (req: Request) => {
+  const url = new URL(req.url);
+
+  if (url.pathname !== "/pixel") {
+    return new Response("Not found", { status: 404 });
+  }
+
+  const leadId = url.searchParams.get("lead_id") || "";
+  const mailType = url.searchParams.get("mailType") || "initial";
+
+  if (leadId) {
+    const callbackUrl =
+      `${appsScriptUrl}?action=pixel_open` +
+      `&lead_id=${encodeURIComponent(leadId)}` +
+      `&mailType=${encodeURIComponent(mailType)}`;
+
+    fetch(callbackUrl).catch((err) => {
+      console.log("Apps Script callback failed:", err);
+    });
+  }
+
+  const pixel = Uint8Array.from(
+    atob("R0lGODlhAQABAPAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="),
+    c => c.charCodeAt(0)
+  );
+
+  return new Response(pixel, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/gif",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    }
+  });
+});
